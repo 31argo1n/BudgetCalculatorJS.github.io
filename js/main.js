@@ -13,33 +13,9 @@ const   totalBalance = document.querySelector('.total__balance'),               
 
 // Нам нужно где-то хранить данные, нам понадобиться массив внутри которого будут объекты.
 // Стоит почитать и порешать задачи на тему массивов и объектов
-let dbOperation = [
-    {
-        id: '1',
-        description: 'Получил зарплату',
-        amount: 40000,
-    },
-    {
-        id: '2',
-        description: 'Долг',
-        amount: -10000,
-    },
-    {
-        id: '3',
-        description: 'Получил аванс',
-        amount: 6000,
-    },
-    {
-        id: '4',
-        description: 'Купил Компухтер',
-        amount: -30000,
-    },
-    {
-        id: '5',
-        description: 'Получил премию',
-        amount: 5000,
-    },
-];
+let dbOperation = JSON.parse(localStorage.getItem('calc')) || [];
+
+
 
 // Выше у нас сформированна База данных операций, которую уже можно выводить на страницу.
 
@@ -58,7 +34,7 @@ const className = operation.amount < 0 ? 'history__item-minus' : 'history__item-
                                                             // Добавляем с помощью innerHtml вёрстку внутрь элемента li
           listItem.innerHTML = `${operation.description}
             <span class="history__money">${operation.amount} ₽</span>
-            <button class="history_delete">x</button>
+            <button class="history_delete" data-id="${operation.id}">x</button>
           `;
     
 
@@ -116,20 +92,35 @@ const addOperation = (event) => {
         }
         operationName.value   = ''; // Очищение полей ввода после добавления операции.
         operationAmount.value   = ''; // Очищение полей ввода после добавления операции.
-    }
+    };
 
 
+    const deleteOperation = (event) => {                    // Функция удаления операций
+        const target = event.target;
 
-const init = () => {                    // Инициализация
+        if(target.classList.contains('history_delete')) {
+            dbOperation = dbOperation
+                .filter(operation => operation.id !== target.dataset.id);
+            
+            init();
+        }
+       
+
+    };
+
+
+    const init = () => {                    // Инициализация
     historyList.textContent = '';       // Нужно чистое поле для выведения операций.
-
     dbOperation.forEach (renderOperation);
     // Тут метод перебора массива forEach, который обращаеться к БД и присваивает данные по порядку в стрелочной функции вызываеться функция рендера и зовётся той же переменной, или просто присвоить имя функции рендера.
     updateBalance();    
-}
+    localStorage.setItem('calc', JSON.stringify(dbOperation));
+    }
 
 
 form.addEventListener('submit', addOperation);
+
+historyList.addEventListener('click', deleteOperation);
 
 
 
